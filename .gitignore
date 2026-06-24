@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local Node Binary Folder
+node-v22.13.0-win-x64/
+
