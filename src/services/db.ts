@@ -8,6 +8,177 @@ import {
   mockPurchases, mockSales, mockStockMovements, mockActivityLogs 
 } from './mockData';
 
+// Helper to map mock IDs to consistent, valid UUID format for PostgreSQL compatability
+const mapIdToUuid = (id: string): string => {
+  if (id.startsWith('prod-')) {
+    const num = id.split('-')[1];
+    return `00000000-0000-0000-0000-0000000000${num.padStart(2, '0')}`;
+  }
+  if (id.startsWith('cust-')) {
+    const num = id.split('-')[1];
+    return `00000000-0000-0000-0000-0000000001${num.padStart(2, '0')}`;
+  }
+  if (id.startsWith('supp-')) {
+    const num = id.split('-')[1];
+    return `00000000-0000-0000-0000-0000000002${num.padStart(2, '0')}`;
+  }
+  if (id.startsWith('purch-')) {
+    const num = id.split('-')[1];
+    return `00000000-0000-0000-0000-0000000003${num.padStart(2, '0')}`;
+  }
+  if (id.startsWith('sale-')) {
+    const num = id.split('-')[1];
+    return `00000000-0000-0000-0000-0000000004${num.padStart(2, '0')}`;
+  }
+  return id;
+};
+
+let isSeeding = false;
+
+export const checkAndSeedSupabase = async (): Promise<void> => {
+  if (!isSupabaseConfigured || isSeeding) return;
+  isSeeding = true;
+  try {
+    const { count, error } = await supabase!
+      .from('products')
+      .select('id', { count: 'exact', head: true });
+    
+    if (error) {
+      console.error('Error checking products count for seeding:', error);
+      isSeeding = false;
+      return;
+    }
+
+    if (count !== 0) {
+      isSeeding = false;
+      return;
+    }
+
+    console.log('Supabase tables are empty. Initializing seeding...');
+
+    // 1. Map and insert products
+    const mappedProducts = mockProducts.map(p => ({
+      ...p,
+      id: mapIdToUuid(p.id)
+    }));
+    const { error: prodErr } = await supabase!.from('products').insert(mappedProducts);
+    if (prodErr) throw prodErr;
+
+    // 2. Map and insert customers
+    const mappedCustomers = mockCustomers.map(c => ({
+      ...c,
+      id: mapIdToUuid(c.id)
+    }));
+    const { error: custErr } = await supabase!.from('customers').insert(mappedCustomers);
+    if (custErr) throw custErr;
+
+    // 3. Map and insert suppliers
+    const mappedSuppliers = mockSuppliers.map(s => ({
+      ...s,
+      id: mapIdToUuid(s.id)
+    }));
+    const { error: suppErr } = await supabase!.from('suppliers').insert(mappedSuppliers);
+    if (suppErr) throw suppErr;
+
+    // 4. Map and insert purchases
+    const mappedPurchases = mockPurchases.map(p => ({
+      id: mapIdToUuid(p.id),
+      supplier_id: mapIdToUuid(p.supplier_id),
+      date: p.date,
+      total_amount: p.total_amount,
+      created_at: p.created_at
+    }));
+    const { error: purchErr } = await supabase!.from('purchases').insert(mappedPurchases);
+    if (purchErr) throw purchErr;
+
+    // 5. Map and insert purchase_items
+    const mappedPurchaseItems: any[] = [];
+    mockPurchases.forEach(p => {
+      if (p.items) {
+        p.items.forEach(item => {
+          mappedPurchaseItems.push({
+            id: item.id.startsWith('pi-') 
+              ? `00000000-0000-0000-0000-0000000005${item.id.split('-')[1].padStart(2, '0')}`
+              : item.id,
+            purchase_id: mapIdToUuid(item.purchase_id),
+            product_id: mapIdToUuid(item.product_id),
+            quantity: item.quantity,
+            unit_cost: item.unit_cost,
+            total_amount: item.total_amount
+          });
+        });
+      }
+    });
+    const { error: piErr } = await supabase!.from('purchase_items').insert(mappedPurchaseItems);
+    if (piErr) throw piErr;
+
+    // 6. Map and insert sales
+    const mappedSales = mockSales.map(s => ({
+      id: mapIdToUuid(s.id),
+      customer_id: mapIdToUuid(s.customer_id),
+      date: s.date,
+      discount: s.discount,
+      tax: s.tax,
+      total_amount: s.total_amount,
+      created_at: s.created_at
+    }));
+    const { error: saleErr } = await supabase!.from('sales').insert(mappedSales);
+    if (saleErr) throw saleErr;
+
+    // 7. Map and insert sale_items
+    const mappedSaleItems: any[] = [];
+    mockSales.forEach(s => {
+      if (s.items) {
+        s.items.forEach(item => {
+          mappedSaleItems.push({
+            id: item.id.startsWith('si-')
+              ? `00000000-0000-0000-0000-0000000006${item.id.split('-')[1].padStart(2, '0')}`
+              : item.id,
+            sale_id: mapIdToUuid(item.sale_id),
+            product_id: mapIdToUuid(item.product_id),
+            quantity: item.quantity,
+            unit_price: item.unit_price,
+            total_amount: item.total_amount
+          });
+        });
+      }
+    });
+    const { error: siErr } = await supabase!.from('sale_items').insert(mappedSaleItems);
+    if (siErr) throw siErr;
+
+    // 8. Map and insert stock movements
+    const mappedStockMovements = mockStockMovements.map(sm => ({
+      id: sm.id.startsWith('m-')
+        ? `00000000-0000-0000-0000-0000000007${sm.id.split('-')[1].padStart(2, '0')}`
+        : sm.id,
+      product_id: mapIdToUuid(sm.product_id),
+      type: sm.type,
+      quantity: sm.quantity,
+      reference_id: mapIdToUuid(sm.reference_id),
+      notes: sm.notes,
+      created_at: sm.created_at
+    }));
+    const { error: smErr } = await supabase!.from('stock_movements').insert(mappedStockMovements);
+    if (smErr) throw smErr;
+
+    // 9. Map and insert activity logs (without user_id)
+    const mappedActivityLogs = mockActivityLogs.map(al => ({
+      user_id: null,
+      action: al.action,
+      details: al.details,
+      created_at: al.created_at
+    }));
+    const { error: alErr } = await supabase!.from('activity_logs').insert(mappedActivityLogs);
+    if (alErr) throw alErr;
+
+    console.log('Supabase tables successfully seeded!');
+  } catch (err) {
+    console.error('Failed to seed Supabase database:', err);
+  } finally {
+    isSeeding = false;
+  }
+};
+
 // Dynamic Database State Indicator
 export const getDatabaseStatus = async (): Promise<DatabaseStatus> => {
   if (!isSupabaseConfigured) {
@@ -18,8 +189,23 @@ export const getDatabaseStatus = async (): Promise<DatabaseStatus> => {
     };
   }
   try {
+    // Verify that we have a valid, authenticated user session in Supabase.
+    // If not authenticated, we gracefully fallback to local storage mock data to prevent blank states.
+    const { data: { session } } = await supabase!.auth.getSession();
+    if (!session) {
+      return {
+        isSupabase: true,
+        connected: false,
+        message: 'Supabase Offline (Login Required for Cloud Sync)'
+      };
+    }
+
     const { error } = await supabase!.from('products').select('count', { count: 'exact', head: true });
     if (error) throw error;
+    
+    // Trigger seed check & execution in background
+    checkAndSeedSupabase();
+
     return {
       isSupabase: true,
       connected: true,
