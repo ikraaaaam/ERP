@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="public/logo.png" alt="Logo" width="80" height="80">
+  <img src="https://raw.githubusercontent.com/ikraaaaam/ERP/main/public/logo.png" alt="Code Bondhu IT Logo" width="80" height="80" style="border-radius:12px">
 
   <h1 align="center">ERP Nexus</h1>
 
