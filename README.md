@@ -46,7 +46,7 @@ ERP Nexus utilizes a modern, edge-ready architecture to deliver exceptional perf
 - **Offline-First Resilience**: If the Supabase environment is unconfigured or disconnected, the application securely falls back to a **Local Storage Database Engine** with a robust data abstraction layer.
 
 <p align="center">
-  <img src="docs/assets/inventory.png" alt="Inventory Management UI" width="100%">
+  <img src="docs/assets/analytics.png" alt="Inventory Management UI" width="100%">
 </p>
 
 ---
