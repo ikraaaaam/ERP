@@ -2,17 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Package,
-  Users,
-  DollarSign,
   ArrowUpRight,
-  ArrowDownRight,
   AlertTriangle,
-  TrendingUp,
-  ShoppingBag,
-  History as HistoryIcon,
   ChevronRight,
-  Truck,
-  MoreHorizontal,
   Activity
 } from 'lucide-react';
 import { 
@@ -37,7 +29,7 @@ import {
 import type { Product, Customer, Supplier, Purchase, Sale } from '../types';
 
 // ─── Mini Sparkline using SVG (no extra deps) ───────────────────────────────
-const MiniSparkline: React.FC<{ data: number[]; color: string; negative?: boolean }> = ({ data, color, negative }) => {
+const MiniSparkline: React.FC<{ data: number[]; color: string; negative?: boolean }> = ({ data, color }) => {
   if (!data.length) return null;
   const max = Math.max(...data, 1);
   const min = Math.min(...data, 0);
@@ -201,19 +193,6 @@ export const Dashboard: React.FC = () => {
 
   // ── Aggregations ──────────────────────────────────────────────────────────
   const lifetimeRevenue = sales.reduce((s, x) => s + x.total_amount, 0);
-  const totalCOGS = (() => {
-    let cogs = 0;
-    sales.forEach(s => {
-      if (s.items) s.items.forEach(item => {
-        const prod = products.find(p => p.id === item.product_id);
-        cogs += item.quantity * (prod ? prod.purchase_price : item.unit_price * 0.5);
-      });
-    });
-    return cogs;
-  })();
-  const netProfit = Math.max(0, lifetimeRevenue - totalCOGS);
-  const inventoryValue = products.reduce((s, p) => s + (p.current_stock * p.selling_price), 0);
-  const activeOrders = purchases.length + sales.length;
 
   // ── Last 8 days chart data ────────────────────────────────────────────────
   const getTrendsData = () => {
@@ -245,9 +224,6 @@ export const Dashboard: React.FC = () => {
   };
   const chartData = getTrendsData();
   const revenueSparkline = chartData.map(d => d.Revenue);
-  const profitSparkline = chartData.map(d => d.Profit);
-  const ordersSparkline = Array.from({ length: 8 }, (_, i) => Math.max(0, activeOrders - i));
-  const inventorySparkline = Array.from({ length: 8 }, (_, i) => inventoryValue * (0.97 + i * 0.004));
 
   // ── Widgets ───────────────────────────────────────────────────────────────
   const lowStockProducts = products.filter(p => p.current_stock <= p.minimum_stock).sort((a, b) => a.current_stock - b.current_stock).slice(0, 5);
@@ -281,8 +257,6 @@ export const Dashboard: React.FC = () => {
     return `$${n.toFixed(0)}`;
   };
 
-  // Derived margin pct for secondary label
-  const marginPct = lifetimeRevenue > 0 ? ((netProfit / lifetimeRevenue) * 100).toFixed(0) : '0';
 
   return (
     <div className="space-y-5 animate-fade-in">
