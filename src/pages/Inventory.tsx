@@ -116,7 +116,7 @@ export const Inventory: React.FC = () => {
       {/* Valuation Metrics Summary */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Cost valuation */}
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-premium">
+        <div className="card-premium p-6 rounded-2xl">
           <div className="flex items-center justify-between text-xs font-bold text-muted-foreground uppercase tracking-wider">
             <span>Valuation at Cost</span>
             <DollarSign className="h-4.5 w-4.5 text-primary" />
@@ -126,7 +126,7 @@ export const Inventory: React.FC = () => {
         </div>
 
         {/* Retail valuation */}
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-premium">
+        <div className="card-premium p-6 rounded-2xl">
           <div className="flex items-center justify-between text-xs font-bold text-muted-foreground uppercase tracking-wider">
             <span>Valuation at Retail</span>
             <TrendingUp className="h-4.5 w-4.5 text-green-500" />
@@ -136,7 +136,7 @@ export const Inventory: React.FC = () => {
         </div>
 
         {/* Potential Profit */}
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-premium">
+        <div className="card-premium p-6 rounded-2xl">
           <div className="flex items-center justify-between text-xs font-bold text-muted-foreground uppercase tracking-wider">
             <span>Potential Profit</span>
             <DollarSign className="h-4.5 w-4.5 text-green-500" />
@@ -146,7 +146,7 @@ export const Inventory: React.FC = () => {
         </div>
 
         {/* Low Stock Warnings */}
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-premium">
+        <div className="card-premium p-6 rounded-2xl">
           <div className="flex items-center justify-between text-xs font-bold text-muted-foreground uppercase tracking-wider">
             <span>Low Stock Alerts</span>
             <AlertTriangle className="h-4.5 w-4.5 text-amber-500" />
@@ -157,9 +157,9 @@ export const Inventory: React.FC = () => {
       </div>
 
       {/* Structured Tabbed Section */}
-      <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-premium flex flex-col">
+      <div className="card-premium overflow-hidden flex flex-col rounded-2xl">
         {/* Navigation Tabs Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-border bg-muted/20 px-6 py-2 gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-border bg-muted/40 dark:bg-muted/20 px-6 py-2 gap-3">
           <div className="flex border-b sm:border-b-0 border-border">
             <button
               onClick={() => { setActiveTab('ledger'); setSearch(''); setPage(1); }}
@@ -208,7 +208,7 @@ export const Inventory: React.FC = () => {
               placeholder={activeTab === 'ledger' ? 'Search ledger logs...' : 'Search low stock items...'}
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              className="w-full rounded-lg border border-input bg-card py-1.5 pl-8 pr-3 text-xs outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+              className="w-full rounded-full border border-border bg-muted dark:bg-[hsl(215_28%_11%)] py-1.5 pl-8 pr-3 text-xs outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 text-foreground placeholder:text-muted-foreground"
             />
           </div>
         </div>
@@ -294,10 +294,10 @@ export const Inventory: React.FC = () => {
                       <td className="px-6 py-4 font-mono text-xs">{p.sku}</td>
                       <td className="px-6 py-4 text-right font-medium text-muted-foreground">{p.minimum_stock} Units</td>
                       <td className="px-6 py-4 text-right font-bold">
-                        <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs
+                        <span className={`shrink-0 ml-2 px-2.5 py-0.5 rounded-full text-xs font-bold
                           ${p.current_stock === 0 
-                            ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400' 
-                            : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                            ? 'bg-rose-500/15 text-rose-400 border border-rose-500/20' 
+                            : 'bg-amber-500/15 text-amber-400 border border-amber-500/20'
                           }
                         `}>
                           {p.current_stock === 0 ? 'Out of Stock' : `${p.current_stock} Units`}
@@ -328,7 +328,7 @@ export const Inventory: React.FC = () => {
 
         {/* Pagination bar */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between border-t border-border px-6 py-4 bg-muted/20">
+          <div className="flex items-center justify-between border-t border-border bg-muted/20 px-6 py-4">
             <span className="text-xs text-muted-foreground font-semibold">
               Showing page {page} of {totalPages} ({activeItems.length} records)
             </span>
