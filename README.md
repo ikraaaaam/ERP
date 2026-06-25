@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="public/vite.svg" alt="Logo" width="80" height="80">
+  <img src="public/logo.png" alt="Logo" width="80" height="80">
 
   <h1 align="center">ERP Nexus</h1>
 
